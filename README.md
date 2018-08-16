@@ -223,3 +223,17 @@ data:
   drink: {{ .Values.favorite.drink | quote }}
   food: {{ .Values.favorite.food | upper | quote }}
 ```
+
+When evaluated, that template will produce this:
+
+```yaml
+# Source: helm-chart-sandbox/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maudlin-condor-configmap
+data:
+  myvalue: "Hello World"
+  drink: "coffee"
+  food: "PIZZA"
+```
