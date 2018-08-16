@@ -114,3 +114,99 @@ metadata:
 data:
   myvalue: "Hello World"
 ```
+Values files are plain YAML files. Let's edit helm-chart-sandbox/values.yaml and then edit our ConfigMap template.
+
+```yaml
+favorite:
+  drink: coffee
+  food: pizza
+```
+Now we would have to modify the template slightly:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  drink: {{ .Values.favorite.drink }}
+  food: {{ .Values.favorite.food }}
+```
+
+Let's see how this renders.
+
+```console
+$ helm install --dry-run --debug helm-chart-sandbox
+[debug] Created tunnel using local port: '52414'
+
+[debug] SERVER: "127.0.0.1:52414"
+
+[debug] Original chart version: ""
+[debug] CHART PATH: /Volumes/test/helm-chart-sandbox
+
+NAME:   sad-opossum
+REVISION: 1
+RELEASED: Thu Aug 16 15:17:28 2018
+CHART: helm-chart-sandbox-0.1.0
+USER-SUPPLIED VALUES:
+{}
+
+COMPUTED VALUES:
+favorite:
+  drink: coffee
+  food: pizza
+
+HOOKS:
+MANIFEST:
+
+---
+# Source: helm-chart-sandbox/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sad-opossum-configmap
+data:
+  myvalue: "Hello World"
+  drink: coffee
+  food: pizza
+```
+
+We can easily override that by adding a --set flag in our call to helm install:
+
+```console
+$ helm install --dry-run --debug --set favorite.drink=slurm helm-chart-sandbox
+[debug] Created tunnel using local port: '52503'
+
+[debug] SERVER: "127.0.0.1:52503"
+
+[debug] Original chart version: ""
+[debug] CHART PATH: /Volumes/test/helm-chart-sandbox
+
+NAME:   ardent-abalone
+REVISION: 1
+RELEASED: Thu Aug 16 15:25:03 2018
+CHART: helm-chart-sandbox-0.1.0
+USER-SUPPLIED VALUES:
+favorite:
+  drink: slurm
+
+COMPUTED VALUES:
+favorite:
+  drink: slurm
+  food: pizza
+
+HOOKS:
+MANIFEST:
+
+---
+# Source: helm-chart-sandbox/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ardent-abalone-configmap
+data:
+  myvalue: "Hello World"
+  drink: slurm
+  food: pizza
+```
